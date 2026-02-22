@@ -2,56 +2,172 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<!-- WAJIB BIAR MOBILE NORMAL -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Send The Song</title>
-
+<title>SendTheSong</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
 
-<div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
+<div class="bg-white w-full max-w-xl p-8 rounded-3xl shadow-2xl">
 
-<h1 class="text-2xl font-bold text-center mb-6">
-Send The Song 🎵
+<h1 class="text-3xl font-bold text-center mb-8 text-purple-600">
+SendTheSong 🎵
 </h1>
 
-<input id="nama" 
-placeholder="Your name"
-class="w-full p-3 border rounded-xl mb-4 text-sm">
-
-<input id="to" 
-placeholder="To (their name)"
-class="w-full p-3 border rounded-xl mb-4 text-sm">
-
-<input id="lagu" 
-placeholder="Song title"
-class="w-full p-3 border rounded-xl mb-4 text-sm">
-
-<input id="artist" 
-placeholder="Artist"
-class="w-full p-3 border rounded-xl mb-4 text-sm">
+<input id="nama" type="text"
+placeholder="Your name (optional)"
+class="w-full p-4 rounded-2xl border mb-4">
 
 <textarea id="pesan"
 placeholder="Write your message..."
-class="w-full p-3 border rounded-xl mb-4 text-sm resize-none"
-rows="3"></textarea>
+class="w-full p-4 rounded-2xl border mb-6"></textarea>
 
-<button onclick="submitForm()"
+<div class="relative mb-6">
+<input id="search" type="text"
+placeholder="Search song"
+oninput="searchSong()"
+class="w-full p-4 rounded-2xl border">
+
+<div id="dropdown"
+class="absolute w-full bg-white mt-2 rounded-2xl shadow-xl 
+max-h-72 overflow-y-auto hidden z-50">
+</div>
+</div>
+
+<div id="selectedSong" class="mb-6"></div>
+
+<button type="button" onclick="submitForm()"
 class="w-full bg-purple-600 hover:bg-purple-700 
-text-white py-3 rounded-xl font-semibold transition text-sm">
-Send 💌
+text-white py-3 rounded-2xl font-semibold transition">
+Send
 </button>
 
 </div>
 
-<script>
-function submitForm(){
-alert("Ini contoh UI responsive dulu ya 🔥");
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ====== GANTI DENGAN CONFIG KAMU ====== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf",
+  measurementId: "G-CQ5WK95N7Y"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let selectedSongData = null;
+
+/* ====== SEARCH SONG ====== */
+
+window.searchSong = async function(){
+
+let q = document.getElementById("search").value;
+
+if(q.length < 2){
+document.getElementById("dropdown").classList.add("hidden");
+return;
 }
+
+const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=8`);
+const data = await res.json();
+
+let html = "";
+
+data.results.forEach(song=>{
+
+html += `
+<div onclick="selectSong(
+\`${song.trackName}\`,
+\`${song.artistName}\`,
+\`${song.artworkUrl100}\`,
+\`${song.previewUrl}\`
+)"
+class="flex items-center p-3 hover:bg-purple-50 cursor-pointer border-b">
+
+<img src="${song.artworkUrl60}" class="w-12 h-12 rounded-lg mr-3">
+
+<div>
+<div class="font-semibold">${song.trackName}</div>
+<div class="text-sm text-gray-500">${song.artistName}</div>
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById("dropdown").innerHTML = html;
+document.getElementById("dropdown").classList.remove("hidden");
+
+}
+
+/* ====== SELECT SONG ====== */
+
+window.selectSong = function(nama, artist, img, preview){
+
+selectedSongData = { nama, artist, img, preview };
+
+document.getElementById("search").value = nama + " - " + artist;
+document.getElementById("dropdown").classList.add("hidden");
+
+document.getElementById("selectedSong").innerHTML = `
+<div class="flex items-center bg-gradient-to-r from-pink-100 to-purple-100
+p-4 rounded-2xl shadow-lg">
+
+<img src="${img}" class="w-16 h-16 rounded-xl mr-4">
+
+<div class="flex-1">
+<div class="font-bold text-purple-700">${nama}</div>
+<div class="text-sm text-gray-600 mb-2">${artist}</div>
+<audio controls class="w-full h-8" src="${preview}"></audio>
+</div>
+</div>
+`;
+
+}
+
+/* ====== SUBMIT ====== */
+
+window.submitForm = async function(){
+
+try{
+
+let nama = document.getElementById("nama").value || "Someone";
+let pesan = document.getElementById("pesan").value;
+
+if(!selectedSongData){
+alert("Pilih lagu dulu 🎵");
+return;
+}
+
+await addDoc(collection(db,"messages"),{
+nama,
+pesan,
+lagu:selectedSongData.nama,
+artist:selectedSongData.artist,
+img:selectedSongData.img,
+preview:selectedSongData.preview,
+createdAt:new Date()
+});
+
+alert("Berhasil dikirim 💌");
+location.reload();
+
+}catch(error){
+console.error(error);
+alert("Gagal kirim, cek console");
+}
+
+}
+
 </script>
 
 </body>
