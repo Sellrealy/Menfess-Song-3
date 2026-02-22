@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+<div class="bg-white p-8 rounded-xl shadow w-full max-w-md">
+
+<h1 class="text-xl font-bold mb-6 text-center">Admin Login 🔐</h1>
+
+<input id="email" placeholder="Email"
+class="w-full p-3 border rounded mb-4">
+
+<input id="password" type="password" placeholder="Password"
+class="w-full p-3 border rounded mb-4">
+
+<button onclick="login()"
+class="w-full bg-purple-600 text-white py-3 rounded">
+Login
+</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf",
+  measurementId: "G-CQ5WK95N7Y"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.login=function(){
+let email=document.getElementById("email").value;
+let password=document.getElementById("password").value;
+
+signInWithEmailAndPassword(auth,email,password)
+.then(()=>window.location.href="admin.html")
+.catch(()=>alert("Login gagal"));
+}
+
+</script>
+
+</body>
+</html>
