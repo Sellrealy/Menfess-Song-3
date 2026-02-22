@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Message</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div id="loading" class="text-gray-500 text-lg">
+Loading...
+</div>
+
+<div id="content" class="hidden w-full max-w-md p-6 text-center">
+
+<button onclick="goBack()" 
+class="mb-6 bg-gray-200 px-4 py-2 rounded-lg">
+← Back
+</button>
+
+<h2 class="text-xl mb-2">
+Hello, <span id="toName"></span>
+</h2>
+
+<p class="text-gray-500 mb-6 text-sm">
+Someone sent this song 💌
+</p>
+
+<div id="songCard"></div>
+
+<p class="mt-6 text-gray-600 text-sm">
+Also, here's a message:
+</p>
+
+<p id="messageText"
+class="mt-3 text-lg font-mono break-words">
+</p>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* GET ID FROM URL */
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+if(!id){
+alert("Message tidak ditemukan");
+window.location.href="admin.html";
+}
+
+/* LOAD DATA */
+async function loadData(){
+
+const docRef = doc(db,"messages",id);
+const snap = await getDoc(docRef);
+
+if(!snap.exists()){
+alert("Data tidak ada");
+window.location.href="admin.html";
+return;
+}
+
+const d = snap.data();
+
+/* WARNA STABIL BERDASARKAN ID */
+const colors = [
+"linear-gradient(135deg,#ff0080,#7928ca)",
+"linear-gradient(135deg,#00c6ff,#0072ff)",
+"linear-gradient(135deg,#ff512f,#dd2476)",
+"linear-gradient(135deg,#00f260,#0575e6)",
+"linear-gradient(135deg,#f7971e,#ffd200)",
+"linear-gradient(135deg,#8e2de2,#4a00e0)"
+];
+
+const colorIndex = id.length % colors.length;
+const selectedColor = colors[colorIndex];
+
+/* TAMPILKAN */
+document.getElementById("loading").classList.add("hidden");
+document.getElementById("content").classList.remove("hidden");
+
+document.getElementById("toName").innerText = d.nama;
+document.getElementById("messageText").innerText = d.pesan;
+
+document.getElementById("songCard").innerHTML = `
+<div 
+class="p-6 rounded-2xl text-white shadow-xl transition hover:scale-105"
+style="
+background:${selectedColor};
+box-shadow:0 0 25px rgba(0,0,0,0.4);
+">
+
+<img src="${d.img}" 
+class="w-28 h-28 mx-auto rounded-xl shadow-lg object-cover">
+
+<p class="text-lg font-bold mt-4">${d.lagu}</p>
+<p class="opacity-80 text-sm">${d.artist}</p>
+
+<audio controls 
+class="mt-4 w-full"
+src="${d.preview}">
+</audio>
+
+</div>
+`;
+
+}
+
+loadData();
+
+/* BACK */
+window.goBack = function(){
+window.location.href="admin.html";
+}
+
+</script>
+
+</body>
+</html>
