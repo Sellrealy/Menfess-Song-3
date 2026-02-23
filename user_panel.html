@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Panel | Menfess Song</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- HEADER -->
+<div class="flex justify-between items-center px-8 py-6 border-b bg-white">
+<h1 class="text-2xl font-bold">Menfess Song</h1>
+<button onclick="logout()" class="bg-black text-white px-4 py-2 rounded-lg hover:opacity-90">Logout</button>
+</div>
+
+<!-- KIRIM MENFESS -->
+<div class="max-w-3xl mx-auto p-8">
+<h2 class="text-xl font-semibold mb-6">Kirim Menfess 💌</h2>
+
+<input type="text" id="songName" placeholder="Nama Lagu" class="w-full mb-2 p-2 border rounded"/>
+<input type="text" id="artist" placeholder="Artist" class="w-full mb-2 p-2 border rounded"/>
+<input type="url" id="img" placeholder="Cover Image URL" class="w-full mb-2 p-2 border rounded"/>
+<input type="url" id="preview" placeholder="Audio Preview URL" class="w-full mb-2 p-2 border rounded"/>
+<textarea id="message" placeholder="Pesanmu..." class="w-full mb-2 p-2 border rounded"></textarea>
+<button onclick="sendMenfess()" class="bg-blue-600 text-white px-4 py-2 rounded hover:opacity-90">Kirim Menfess</button>
+</div>
+
+<!-- LIST BALASAN ADMIN -->
+<div class="max-w-3xl mx-auto p-8">
+<h2 class="text-xl font-semibold mb-4">Kotak Balasan Admin 📨</h2>
+<div id="messagesList" class="space-y-4"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUserUid;
+
+// AUTH CHECK
+onAuthStateChanged(auth,user=>{
+  if(!user) window.location.href="user-login.html";
+  else{
+    currentUserUid = user.uid;
+    loadMessages();
+  }
+});
+
+// KIRIM MENFESS
+async function sendMenfess(){
+  const songName = document.getElementById("songName").value;
+  const artist = document.getElementById("artist").value;
+  const img = document.getElementById("img").value;
+  const preview = document.getElementById("preview").value;
+  const message = document.getElementById("message").value;
+
+  if(!songName || !artist || !img || !preview || !message) return alert("Semua field harus diisi!");
+
+  await addDoc(collection(db,"messages"),{
+    senderUid: currentUserUid,
+    senderName: "Anonymous",
+    songName,
+    artist,
+    img,
+    preview,
+    message,
+    createdAt: serverTimestamp(),
+    adminReply: null
+  });
+
+  alert("Menfess terkirim!");
+  loadMessages();
+}
+
+// LOAD BALASAN ADMIN
+async function loadMessages(){
+  const messagesDiv = document.getElementById("messagesList");
+  messagesDiv.innerHTML = "";
+
+  const q = query(collection(db,"messages"), where("senderUid","==",currentUserUid), orderBy("createdAt","desc"));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc=>{
+    const d = doc.data();
+    const adminReply = d.adminReply ? d.adminReply.message : "Belum dibalas admin";
+    messagesDiv.innerHTML += `
+      <div class="bg-white p-4 rounded shadow">
+        <p><strong>Lagu:</strong> ${d.songName} - ${d.artist}</p>
+        <p class="mt-1"><strong>Pesanmu:</strong> ${d.message}</p>
+        <p class="mt-1 text-blue-600"><strong>Balasan Admin:</strong> ${adminReply}</p>
+      </div>
+    `;
+  });
+}
+
+// LOGOUT
+function logout(){
+  signOut(auth);
+  window.location.href="user-login.html";
+}
+</script>
+
+</body>
+</html>
