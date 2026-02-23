@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register | Menfess Song</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white p-8 rounded-xl shadow-lg w-96">
+<h1 class="text-2xl font-bold mb-6 text-center">Register Menfess Song</h1>
+
+<input type="text" id="name" placeholder="Nama" class="w-full mb-4 p-2 border rounded"/>
+<input type="email" id="email" placeholder="Email" class="w-full mb-4 p-2 border rounded"/>
+<input type="password" id="password" placeholder="Password" class="w-full mb-4 p-2 border rounded"/>
+<button onclick="register()" class="w-full bg-blue-600 text-white py-2 rounded hover:opacity-90">Register</button>
+
+<p class="mt-4 text-sm text-center">
+Sudah punya akun? <a href="user-login.html" class="text-blue-600">Login</a>
+</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+async function register(){
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if(!name || !email || !password) return alert("Semua field harus diisi!");
+
+  try{
+    const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+    const uid = userCredential.user.uid;
+    await setDoc(doc(db,"users",uid),{name,email});
+    alert("Berhasil daftar!");
+    window.location.href = "user-login.html";
+  }catch(err){
+    alert(err.message);
+  }
+}
+</script>
+
+</body>
+</html>
