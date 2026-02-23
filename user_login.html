@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login | Menfess Song</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white p-8 rounded-xl shadow-lg w-96">
+<h1 class="text-2xl font-bold mb-6 text-center">Login Menfess Song</h1>
+
+<input type="email" id="email" placeholder="Email" class="w-full mb-4 p-2 border rounded"/>
+<input type="password" id="password" placeholder="Password" class="w-full mb-4 p-2 border rounded"/>
+<button onclick="login()" class="w-full bg-green-600 text-white py-2 rounded hover:opacity-90">Login</button>
+
+<p class="mt-4 text-sm text-center">
+Belum punya akun? <a href="user-register.html" class="text-blue-600">Register</a>
+</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
+  authDomain: "menfess-song.firebaseapp.com",
+  projectId: "menfess-song",
+  storageBucket: "menfess-song.firebasestorage.app",
+  messagingSenderId: "1022645121022",
+  appId: "1:1022645121022:web:32d217b52facf523011aaf"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Jika user sudah login, langsung redirect
+onAuthStateChanged(auth,user=>{
+  if(user) window.location.href="user-panel.html";
+});
+
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  if(!email || !password) return alert("Isi email & password");
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    window.location.href = "user-panel.html";
+  }catch(err){
+    alert(err.message);
+  }
+}
+</script>
+
+</body>
+</html>
