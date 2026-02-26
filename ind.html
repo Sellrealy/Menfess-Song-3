@@ -1,58 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Login</title>
+
+<!-- WAJIB BIAR MOBILE NORMAL -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Send The Song</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-<div class="bg-white p-8 rounded-xl shadow w-full max-w-md">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
 
-<h1 class="text-xl font-bold mb-6 text-center">Admin Login 🔐</h1>
+<div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
 
-<input id="email" placeholder="Email"
-class="w-full p-3 border rounded mb-4">
+<h1 class="text-2xl font-bold text-center mb-6">
+Send The Song 🎵
+</h1>
 
-<input id="password" type="password" placeholder="Password"
-class="w-full p-3 border rounded mb-4">
+<input id="nama" 
+placeholder="Your name"
+class="w-full p-3 border rounded-xl mb-4 text-sm">
 
-<button onclick="login()"
-class="w-full bg-purple-600 text-white py-3 rounded">
-Login
+<input id="to" 
+placeholder="To (their name)"
+class="w-full p-3 border rounded-xl mb-4 text-sm">
+
+<input id="lagu" 
+placeholder="Song title"
+class="w-full p-3 border rounded-xl mb-4 text-sm">
+
+<input id="artist" 
+placeholder="Artist"
+class="w-full p-3 border rounded-xl mb-4 text-sm">
+
+<textarea id="pesan"
+placeholder="Write your message..."
+class="w-full p-3 border rounded-xl mb-4 text-sm resize-none"
+rows="3"></textarea>
+
+<button onclick="submitForm()"
+class="w-full bg-purple-600 hover:bg-purple-700 
+text-white py-3 rounded-xl font-semibold transition text-sm">
+Send 💌
 </button>
 
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDjfDFhy2sz2z-hBkrDq8-60E_Uum-Y51s",
-  authDomain: "menfess-song.firebaseapp.com",
-  projectId: "menfess-song",
-  storageBucket: "menfess-song.firebasestorage.app",
-  messagingSenderId: "1022645121022",
-  appId: "1:1022645121022:web:32d217b52facf523011aaf",
-  measurementId: "G-CQ5WK95N7Y"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-window.login=function(){
-let email=document.getElementById("email").value;
-let password=document.getElementById("password").value;
-
-signInWithEmailAndPassword(auth,email,password)
-.then(()=>window.location.href="admin.html")
-.catch(()=>alert("Login gagal"));
+<script>
+function submitForm(){
+alert("Ini contoh UI responsive dulu ya 🔥");
 }
-
 </script>
 
 </body>
 </html>
-
